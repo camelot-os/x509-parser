@@ -1,0 +1,65 @@
+name: Build
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  native:
+    name: Native (Meson)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout project
+        uses: actions/checkout@v4
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y meson ninja-build pkg-config
+
+      - name: Configure native build
+        run: meson setup build-native -Dcli=true
+
+      - name: Build native targets
+        run: meson compile -C build-native
+
+  cross:
+    name: Cross (${{ matrix.cross_file }})
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/camelot-os/camelot-builder-sdk:nightly
+    strategy:
+      fail-fast: false
+      matrix:
+        cross_file:
+          - cm4-none-eabi-gcc.ini
+          - cm33-none-eabi-gcc.ini
+    steps:
+      - name: Checkout project
+        uses: actions/checkout@v4
+
+      - name: Fetch Meson cross files
+        run: |
+          rm -rf meson-cross-files
+          git clone --depth 1 https://github.com/camelot-os/meson-cross-files.git meson-cross-files
+
+      - name: Prepare toolchain path for cross files
+        shell: bash
+        run: |
+          set -euo pipefail
+          if ! command -v arm-none-eabi-gcc >/dev/null 2>&1; then
+            echo "arm-none-eabi-gcc not found in container image"
+            exit 1
+          fi
+
+          toolchain_root="$(dirname "$(dirname "$(command -v arm-none-eabi-gcc)")")"
+          ln -s "$toolchain_root" "$GITHUB_WORKSPACE/arm-none-eabi"
+
+      - name: Configure cross build
+        run: |
+          meson setup "build-cross-${{ matrix.cross_file }}" \
+            --cross-file "meson-cross-files/${{ matrix.cross_file }}"
+
+      - name: Build cross targets
+        run: meson compile -C "build-cross-${{ matrix.cross_file }}"
