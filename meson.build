@@ -7,8 +7,6 @@ project('x509-parser', 'c',
     'default_library=static',
     'b_pie=false',
     'b_staticpic=false',
-
-    'license_dir=share/info/x509-parser/licenses',
     'pkgconfig.relocatable=true',
     ],
     license: 'GPL-2.0-or-later',
