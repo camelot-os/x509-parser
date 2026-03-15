@@ -23,22 +23,7 @@ ACSL annotations for verification with Frama-C (version 18/Argon).
 
 ## Building
 
-The main [Makefile](Makefile) is in the root directory, and compiling is
-as simple as executing:
-
-<pre>
-	$ make
-</pre>
-
-This will compile different elements in the [build](build/) directory:
-
-  * the `x509-parser` binary, which can be used on a DER certificate (or
-    a concatenation of such elements)
-  * the static and shared libraries (`x509-parser.a` and `x509-parser.so`)
-
-### Building with Meson
-
-Meson support is also available.
+Meson is the default build system.
 
 Native build (libraries only, by default):
 
@@ -98,18 +83,10 @@ Public headers are in `include/x509` and must be included using:
 
 ## Validating
 
-The main [Makefile](Makefile) has targets to run several static analyzers.
-
 ### Frama-C
 
-To verify the project with [Frama-C](https://frama-c.com/), use the `frama-c`
-target:
-
-<pre>
-	$ make frama-c
-</pre>
-
-Equivalent Meson test:
+To verify the project with [Frama-C](https://frama-c.com/), use the Meson
+proof test:
 
 <pre>
 	$ meson setup builddir-proof -Dproof=true
@@ -127,13 +104,7 @@ available as a common package on your distribution.
 ### IKOS
 
 To verify the project with [IKOS](https://github.com/NASA-SW-VnV/ikos), use the
-`ikos` target:
-
-<pre>
-	$ make ikos
-</pre>
-
-Equivalent Meson target:
+Meson target:
 
 <pre>
 	$ meson setup builddir-ikos -Dikos=true
@@ -142,3 +113,59 @@ Equivalent Meson target:
 
 IKOS must have been installed prior to calling that target.
 See the [installation instructions](https://github.com/NASA-SW-VnV/ikos/tree/master/doc/install).
+
+## Makefile wrapper targets
+
+The root [Makefile](Makefile) provides convenience targets that invoke Meson
+directly.
+
+Build default CLI + libraries:
+
+<pre>
+	$ make
+</pre>
+
+Equivalent Meson commands:
+
+<pre>
+	$ meson setup build-meson -Dcli=true -Ddefault_library=both
+	$ meson compile -C build-meson
+</pre>
+
+Run Frama-C proof test:
+
+<pre>
+	$ make frama-c
+</pre>
+
+Equivalent Meson commands:
+
+<pre>
+	$ meson setup build-meson-proof -Dproof=true
+	$ meson test -C build-meson-proof frama-c
+</pre>
+
+Run IKOS target:
+
+<pre>
+	$ make ikos
+</pre>
+
+Equivalent Meson commands:
+
+<pre>
+	$ meson setup build-meson-ikos -Dikos=true
+	$ meson compile -C build-meson-ikos ikos
+</pre>
+
+Clean Makefile build directories and backup files:
+
+<pre>
+	$ make clean
+</pre>
+
+Open IKOS database with `ikos-view`:
+
+<pre>
+	$ make ikos-gui
+</pre>
