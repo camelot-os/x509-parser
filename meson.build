@@ -16,6 +16,7 @@ project('x509-parser', 'c',
 compiler = meson.get_compiler('c')
 cli_enabled = get_option('cli')
 ikos_enabled = get_option('ikos')
+proof_enabled = get_option('proof')
 
 compiler.check_header('stdint.h')
 compiler.check_header('string.h')
@@ -33,10 +34,19 @@ endif
 subdir('include')
 subdir('src')
 
+proof_test_enabled = proof_enabled and not meson.is_cross_build()
+
+if proof_test_enabled
+    subdir('proof')
+elif proof_enabled and meson.is_cross_build()
+    message('Proof enabled but cross build detected: skipping Frama-C proof test.')
+endif
+
 summary(
     {
         'cli': cli_enabled,
         'ikos': ikos_enabled,
+                'proof': proof_test_enabled,
     },
     bool_yn: true,
     section: 'Targets',
