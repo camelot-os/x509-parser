@@ -23,6 +23,9 @@ frama-c:
 	$(MESON) setup $(BUILD_DIR_PROOF) -Dproof=true
 	$(MESON) test -C $(BUILD_DIR_PROOF) frama-c
 
+frama-c-gui:
+	frama-c-gui -load $(PROOF_SESSION)
+
 ikos:
 	$(MESON) setup $(BUILD_DIR_IKOS) -Dikos=true
 	$(MESON) compile -C $(BUILD_DIR_IKOS) ikos
