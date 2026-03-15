@@ -64,7 +64,7 @@ USER_DEFINED_LDFLAGS = $(LDFLAGS)
 endif
 
 CFLAGS ?= $(WARNING_CFLAGS) -pedantic -fno-builtin -std=c99 \
-	  -D_FORTIFY_SOURCE=2 $(STACK_PROT_FLAG) -O3
+	  -D_FORTIFY_SOURCE=2 $(STACK_PROT_FLAG) -O3 -Iinclude
 LDFLAGS ?=
 
 LIB_DYN_LDFLAGS ?= -shared -Wl,-z,relro,-z,now

@@ -1,7 +1,7 @@
 # x509-parser project
 
 ## Copyright and license
-Copyright (C) 2022
+Copyright (C) 2022-2026
 
 This software is licensed under a dual BSD and GPL v2 license.
 See [LICENSE](LICENSE) file at the root folder of the project.
@@ -14,6 +14,7 @@ See [LICENSE](LICENSE) file at the root folder of the project.
 
   * Ryad BENADJILA (<mailto:ryad.benadjila@ssi.gouv.fr>)
   * Patricia MOUY (<mailto:patricia.mouy@ssi.gouv.fr>)
+  * H2Lab Development Team (<mailto:bureau@h2lab.org>)
 
 ## Description
 
@@ -31,9 +32,67 @@ as simple as executing:
 
 This will compile different elements in the [build](build/) directory:
 
-  * the x509-parser.o object file
-  * the x509-parser binary, which can be used on a DER certificate (or
+  * the `x509-parser` binary, which can be used on a DER certificate (or
     a concatenation of such elements)
+  * the static and shared libraries (`x509-parser.a` and `x509-parser.so`)
+
+### Building with Meson
+
+Meson support is also available.
+
+Native build (libraries only, by default):
+
+<pre>
+	$ meson setup builddir
+	$ meson compile -C builddir
+</pre>
+
+Enable the CLI binary (`src/main.c`) in native mode:
+
+<pre>
+	$ meson setup builddir-cli -Dcli=true
+	$ meson compile -C builddir-cli
+</pre>
+
+Cross build with a Meson cross file (libraries only):
+
+<pre>
+	$ meson setup builddir-cross --cross-file your-cross-file.ini
+	$ meson compile -C builddir-cross
+</pre>
+
+In cross mode, only the library targets are built. The `x509-parser` binary
+from `src/main.c` is intentionally restricted to native builds.
+
+For bare-metal targets (`system = 'none'` in the cross file), Meson builds the
+static library only.
+
+Install libraries, headers and pkg-config metadata:
+
+<pre>
+	$ meson install -C builddir
+</pre>
+
+Meson installs `x509-parser.pc` in the platform `pkgconfig` directory
+(`$libdir/pkgconfig`).
+
+Example usage:
+
+<pre>
+	$ pkg-config --cflags --libs x509-parser
+</pre>
+
+### Meson options
+
+| Option | Default | Description |
+| --- | --- | --- |
+| `cli` | `false` | Build the `x509-parser` executable from `src/main.c` (native builds only). |
+
+Public headers are in `include/x509` and must be included using:
+
+<pre>
+	#include &lt;x509/x509-parser.h&gt;
+</pre>
 
 ## Validating
 

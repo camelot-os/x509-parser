@@ -10,7 +10,7 @@
 #ifndef __X509_COMMON_H__
 #define __X509_COMMON_H__
 
-#include "x509-utils.h"
+#include <x509/x509-utils.h>
 
 typedef enum {
 	CLASS_UNIVERSAL        = 0x00,

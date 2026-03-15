@@ -8,7 +8,7 @@
  *  LICENSE file at the root folder of the project.
  */
 
-#include "x509-common.h"
+#include <x509/x509-common.h>
 
 #define X509_FILE_NUM 3 /* See x509-utils.h for rationale */
 
@@ -7421,5 +7421,3 @@ u64 time_components_to_comparable_u64(u16 na_year, u8 na_month, u8 na_day,
 
 	return res;
 }
-
-

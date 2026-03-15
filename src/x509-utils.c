@@ -8,7 +8,7 @@
  *  LICENSE file at the root folder of the project.
  */
 
-#include "x509-utils.h"
+#include <x509/x509-utils.h>
 
 #define X509_FILE_NUM 0 /* See x509-utils.h for rationale */
 

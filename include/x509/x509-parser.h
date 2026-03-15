@@ -10,8 +10,8 @@
 #ifndef __X509_PARSER_H__
 #define __X509_PARSER_H__
 
-#include "x509-cert-parser.h"
-#include "x509-crl-parser.h"
+#include <x509/x509-cert-parser.h>
+#include <x509/x509-crl-parser.h>
 
 /*
  * This wrappers around parse_x509_cert() and parse_x509_crl() do not expect the

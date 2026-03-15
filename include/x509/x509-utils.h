@@ -13,7 +13,7 @@
 #include <stdint.h>
 #include <unistd.h>
 #include <string.h>
-#include "x509-config.h"
+#include <x509/x509-config.h>
 
 typedef uint8_t	  u8;
 typedef uint16_t u16;

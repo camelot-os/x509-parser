@@ -10,9 +10,9 @@
 #ifndef __X509_CRL_PARSER_H__
 #define __X509_CRL_PARSER_H__
 
-#include "x509-config.h"
-#include "x509-utils.h"
-#include "x509-common.h"
+#include <x509/x509-config.h>
+#include <x509/x509-utils.h>
+#include <x509/x509-common.h>
 
 typedef struct {
 	/* tbcCertificate */
