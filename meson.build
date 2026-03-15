@@ -15,6 +15,7 @@ project('x509-parser', 'c',
 
 compiler = meson.get_compiler('c')
 cli_enabled = get_option('cli')
+ikos_enabled = get_option('ikos')
 
 compiler.check_header('stdint.h')
 compiler.check_header('string.h')
@@ -35,6 +36,7 @@ subdir('src')
 summary(
     {
         'cli': cli_enabled,
+        'ikos': ikos_enabled,
     },
     bool_yn: true,
     section: 'Targets',

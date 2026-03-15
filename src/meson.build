@@ -93,3 +93,30 @@ elif cli_enabled and meson.is_cross_build()
 else
   message('CLI disabled: skipping x509-parser executable (src/main.c).')
 endif
+
+if ikos_enabled and not meson.is_cross_build()
+  ikos_program = find_program('ikos', required: true)
+  python3_program = find_program('python3', required: true)
+  ikos_compdb_helper = files('../scripts/ikos-from-compdb.py')
+
+  ikos_database = custom_target(
+    'ikos-db',
+    input: 'x509-parser.c',
+    output: 'ikos.db',
+    command: [
+      python3_program,
+      ikos_compdb_helper,
+      '--compdb', meson.project_build_root() / 'compile_commands.json',
+      '--build-dir', meson.project_build_root(),
+      '--source', '@INPUT@',
+      '--output', '@OUTPUT@',
+      '--define', '__IKOS__',
+      '--ikos', 'ikos',
+    ],
+    build_by_default: false,
+  )
+
+  alias_target('ikos', ikos_database)
+elif ikos_enabled and meson.is_cross_build()
+  message('IKOS enabled but cross build detected: skipping IKOS target.')
+endif

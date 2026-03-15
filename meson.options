@@ -4,3 +4,10 @@ option(
   value: false,
   description: 'Build the x509-parser CLI executable from src/main.c (native build only)',
 )
+
+option(
+  'ikos',
+  type: 'boolean',
+  value: false,
+  description: 'Enable IKOS analysis target (native build only), generating ikos.db from src/x509-parser.c',
+)
