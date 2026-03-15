@@ -1,0 +1,6 @@
+option(
+  'cli',
+  type: 'boolean',
+  value: false,
+  description: 'Build the x509-parser CLI executable from src/main.c (native build only)',
+)

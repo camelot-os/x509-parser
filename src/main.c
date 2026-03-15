@@ -15,7 +15,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <errno.h>
-#include "x509-parser.h"
+#include <x509/x509-parser.h>
 
 #define X509_FILE_NUM 1 /* See x509-utils.h for rationale */
 

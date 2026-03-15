@@ -8,7 +8,7 @@
  *  LICENSE file at the root folder of the project.
  */
 
-#include "x509-cert-parser.h"
+#include <x509/x509-cert-parser.h>
 
 #define X509_FILE_NUM 2 /* See x509-utils.h for rationale */
 

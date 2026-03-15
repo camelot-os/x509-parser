@@ -11,7 +11,7 @@ LIBS = $(BUILD_DIR)/x509-parser.a $(BUILD_DIR)/x509-parser.so
 OBJS = $(OBJS_DIR)/x509-parser.o \
        $(OBJS_DIR)/x509-cert-parser.o $(OBJS_DIR)/x509-crl-parser.o \
        $(OBJS_DIR)/x509-common.o $(OBJS_DIR)/x509-utils.o
-HEADERS = $(wildcard src/*.h)
+HEADERS = $(wildcard include/x509/*.h)
 
 include common.mk
 
@@ -57,7 +57,7 @@ $(OBJS_DIR)/x509-common.o: src/x509-common.c $(HEADERS)
 	@mkdir -p $(@D)
 	$(CC) $(LIB_CFLAGS) -c $< -o $@
 
-$(OBJS_DIR)/x509-utils.o: src/x509-utils.c src/x509-utils.h
+$(OBJS_DIR)/x509-utils.o: src/x509-utils.c include/x509/x509-utils.h
 	@mkdir -p $(@D)
 	$(CC) $(LIB_CFLAGS) -c $< -o $@
 
