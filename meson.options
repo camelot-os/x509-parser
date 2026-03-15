@@ -11,3 +11,10 @@ option(
   value: false,
   description: 'Enable IKOS analysis target (native build only), generating ikos.db from src/x509-parser.c',
 )
+
+option(
+  'proof',
+  type: 'boolean',
+  value: false,
+  description: 'Enable Frama-C proof test (native build only)',
+)

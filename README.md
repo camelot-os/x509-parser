@@ -88,6 +88,7 @@ Example usage:
 | --- | --- | --- |
 | `cli` | `false` | Build the `x509-parser` executable from `src/main.c` (native builds only). |
 | `ikos` | `false` | Enable the Meson `ikos` target that generates `ikos.db` from `src/x509-parser.c` (native builds only). |
+| `proof` | `false` | Enable the Meson Frama-C proof test (native builds only). |
 
 Public headers are in `include/x509` and must be included using:
 
@@ -107,6 +108,16 @@ target:
 <pre>
 	$ make frama-c
 </pre>
+
+Equivalent Meson test:
+
+<pre>
+	$ meson setup builddir-proof -Dproof=true
+	$ meson test -C builddir-proof frama-c
+</pre>
+
+The Meson proof test passes the generated `compile_commands.json` directly to
+Frama-C.
 
 Frama-C must have been installed prior to calling that target. Installing
 Frama-C can be done using OPAM. More details can be found on
