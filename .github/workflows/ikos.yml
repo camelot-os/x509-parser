@@ -1,0 +1,137 @@
+name: IKOS
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build-ikos:
+    name: Build IKOS binary
+    runs-on: ubuntu-latest
+    outputs:
+      ikos_tag: ${{ steps.ikos_release.outputs.tag }}
+    steps:
+      - name: Resolve latest IKOS release
+        id: ikos_release
+        run: |
+          set -euo pipefail
+          ikos_tag="$(curl -fsSL https://api.github.com/repos/NASA-SW-VnV/ikos/releases/latest | python3 -c "import json,sys; print(json.load(sys.stdin)['tag_name'])")"
+          echo "tag=${ikos_tag}" >> "${GITHUB_OUTPUT}"
+
+      - name: Install IKOS build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes \
+            gcc g++ cmake curl \
+            libgmp-dev libboost-dev libboost-filesystem-dev \
+            libboost-thread-dev libboost-test-dev \
+            libsqlite3-dev libtbb-dev libz-dev libedit-dev \
+            python3 python3-pip python3-venv \
+            llvm-14 llvm-14-dev llvm-14-tools clang-14
+
+      - name: Cache IKOS installation
+        id: ikos_cache
+        uses: actions/cache@v4
+        with:
+          path: .cache/ikos/install
+          key: ikos-${{ runner.os }}-${{ steps.ikos_release.outputs.tag }}-llvm14-v1
+
+      - name: Build IKOS from source
+        if: steps.ikos_cache.outputs.cache-hit != 'true'
+        run: |
+          set -euo pipefail
+          IKOS_SRC_DIR="${RUNNER_TEMP}/ikos-src"
+          IKOS_BUILD_DIR="${RUNNER_TEMP}/ikos-build"
+          IKOS_INSTALL_DIR="${GITHUB_WORKSPACE}/.cache/ikos/install"
+
+          rm -rf "${IKOS_SRC_DIR}" "${IKOS_BUILD_DIR}" "${IKOS_INSTALL_DIR}"
+          mkdir -p "${IKOS_SRC_DIR}" "${IKOS_BUILD_DIR}" "${IKOS_INSTALL_DIR}"
+
+          curl -fsSL "https://github.com/NASA-SW-VnV/ikos/archive/refs/tags/${{ steps.ikos_release.outputs.tag }}.tar.gz" \
+            | tar -xz --strip-components=1 -C "${IKOS_SRC_DIR}"
+
+          cmake -S "${IKOS_SRC_DIR}" -B "${IKOS_BUILD_DIR}" \
+            -DCMAKE_INSTALL_PREFIX="${IKOS_INSTALL_DIR}" \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DLLVM_CONFIG_EXECUTABLE=/usr/lib/llvm-14/bin/llvm-config \
+            -DCLANG_EXECUTABLE=/usr/bin/clang-14 \
+            -DCLANGXX_EXECUTABLE=/usr/bin/clang++-14
+
+          cmake --build "${IKOS_BUILD_DIR}" --parallel "$(nproc)"
+          cmake --install "${IKOS_BUILD_DIR}"
+
+      - name: Validate IKOS installation
+        run: |
+          test -x .cache/ikos/install/bin/ikos
+          .cache/ikos/install/bin/ikos --version
+
+      - name: Package IKOS artifact
+        run: |
+          tar -C .cache/ikos -czf ikos-install.tar.gz install
+
+      - name: Upload IKOS artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ikos-install-${{ steps.ikos_release.outputs.tag }}
+          path: ikos-install.tar.gz
+          if-no-files-found: error
+          retention-days: 1
+
+  ikos:
+    name: run IKOS analysis
+    runs-on: ubuntu-latest
+    needs: build-ikos
+    steps:
+      - name: Checkout project
+        uses: actions/checkout@v4
+
+      - name: Install IKOS runtime dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes \
+            ninja-build \
+            clang-14 llvm-14 llvm-14-tools \
+            libgmp-dev libboost-filesystem-dev libboost-thread-dev libboost-test-dev \
+            libsqlite3-dev libtbb-dev libz-dev libedit-dev \
+            python3 python3-pip python3-venv
+
+      - name: Download IKOS artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ikos-install-${{ needs.build-ikos.outputs.ikos_tag }}
+          path: .
+
+      - name: Extract IKOS artifact
+        run: |
+          mkdir -p .cache/ikos
+          tar -xzf ikos-install.tar.gz -C .cache/ikos
+          test -x .cache/ikos/install/bin/ikos
+          if [ -f .cache/ikos/install/libexec/bin/python ]; then
+            sudo chmod +x .cache/ikos/install/libexec/bin/python
+          fi
+
+      - name: Add IKOS to PATH
+        run: |
+          echo "${GITHUB_WORKSPACE}/.cache/ikos/install/bin" >> "${GITHUB_PATH}"
+
+      - name: Check IKOS installation
+        run: ikos --version
+
+      - name: Install Meson and Ninja from PyPI
+        run: |
+          python3 -m venv .venv
+          .venv/bin/pip install --upgrade pip
+          .venv/bin/pip install meson ninja
+
+      - name: Add Meson tools to PATH
+        run: echo "${GITHUB_WORKSPACE}/.venv/bin" >> "${GITHUB_PATH}"
+
+      - name: Configure IKOS build
+        run: .venv/bin/meson setup build-ikos -Dikos=true
+
+      - name: Run IKOS analysis target
+        run: .venv/bin/meson compile -C build-ikos ikos
+
+      - name: Verify IKOS database output
+        run: test -f build-ikos/src/ikos.db

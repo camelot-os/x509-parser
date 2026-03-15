@@ -87,6 +87,7 @@ Example usage:
 | Option | Default | Description |
 | --- | --- | --- |
 | `cli` | `false` | Build the `x509-parser` executable from `src/main.c` (native builds only). |
+| `ikos` | `false` | Enable the Meson `ikos` target that generates `ikos.db` from `src/x509-parser.c` (native builds only). |
 
 Public headers are in `include/x509` and must be included using:
 
@@ -119,6 +120,13 @@ To verify the project with [IKOS](https://github.com/NASA-SW-VnV/ikos), use the
 
 <pre>
 	$ make ikos
+</pre>
+
+Equivalent Meson target:
+
+<pre>
+	$ meson setup builddir-ikos -Dikos=true
+	$ meson compile -C builddir-ikos ikos
 </pre>
 
 IKOS must have been installed prior to calling that target.
